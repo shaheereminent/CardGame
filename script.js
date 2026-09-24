@@ -14,29 +14,34 @@ const DOM =
     player2  : document.querySelector ('.player--1')
 };
 
+
+
 const CONFIG = 
 {
-    score       : 0
+    SCORES      : [0, 0],
+    GAMESTATE   : true,
+    CURRENTSCORE: 0,
+    ACTIVEPLAYER: 0,
+    MAX         : 100
 };
+
 
 // Game States
 
-DOM.score0.textContent = CONFIG.score;
+DOM.score0.textContent = 0;
 
-DOM.score1.textContent = CONFIG.score;
+DOM.score1.textContent = 0;
 
 DOM.dice.classList.add('hidden');
 
-let currentScore = CONFIG.score;
-
-let activePlayer = false;
-
 
 // helper functions
+
 const generateRandomNumber = function()
 {
     return Math.trunc(Math.random() * 6 + 1);
 };
+
 
 const rollDice = function(diceNumber)
 {
@@ -45,47 +50,44 @@ const rollDice = function(diceNumber)
 };
 
 
+const switchPlayer = function()
+{
+    DOM[`current${CONFIG.ACTIVEPLAYER}`].textContent = 0;
+    CONFIG.CURRENTSCORE = 0;
+    CONFIG.ACTIVEPLAYER = CONFIG.ACTIVEPLAYER === 0 ? 1 : 0;
+    DOM.player1.classList.toggle('player--active')
+    DOM.player2.classList.toggle('player--active')
+};
+
 
 DOM.btnRoll.addEventListener('click', function()
 {
-    let randomDice = generateRandomNumber();
-
-    rollDice(randomDice);
-    console.log(DOM.player);
-
-    if (!activePlayer)
+    if (CONFIG.GAMESTATE)
     {
-        if (randomDice !== 1)
+        let randomDice = generateRandomNumber();
+    
+        rollDice(randomDice);
+
+        if (randomDice!==1)
         {
-            currentScore += randomDice;
-            DOM.current0.textContent = currentScore;
-            console.log(`Player-1: ${currentScore}`);
+            CONFIG.CURRENTSCORE += randomDice;
+            DOM[`current${CONFIG.ACTIVEPLAYER}`].textContent = CONFIG.CURRENTSCORE;
         }
         else
         {
-            activePlayer = true;
-            currentScore = 0;
-            DOM.current0.textContent = currentScore;
-            DOM.player1.classList.remove('player--active');
-            DOM.player2.classList.add('player--active');
-        };
-    }
-    else if (activePlayer)
-    {
-        if (randomDice !== 1)
-        {
-            currentScore += randomDice;
-            DOM.current1.textContent = currentScore;
-            console.log(`Player-2: ${currentScore}`);
-        }
-        else
-        {
-            activePlayer = false;
-            currentScore = 0;
-            DOM.current1.textContent = currentScore;
-            DOM.player1.classList.add('player--active');
-            DOM.player2.classList.remove('player--active');
+            switchPlayer();
         };
     };
 
+});
+
+DOM.btnHold.addEventListener('click', function()
+{
+    if (CONFIG.GAMESTATE)
+    {
+        CONFIG.SCORES[CONFIG.ACTIVEPLAYER] += CONFIG.CURRENTSCORE
+        DOM[`score${CONFIG.ACTIVEPLAYER}`].textContent = CONFIG.SCORES[CONFIG.ACTIVEPLAYER]
+    
+        switchPlayer();
+    };
 });
